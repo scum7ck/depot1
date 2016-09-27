@@ -45,11 +45,32 @@ class ProductsControllerTest < ActionController::TestCase
     assert_redirected_to product_path(assigns(:product))
   end
 
-  test "should destroy product" do
+
+test "product has line items" do
+  assert_not_equal 0, @product.line_items.count
+end
+
+test "product has no line items" do
+  @product.line_items.each do |item|
+    item.destroy
+  end
+
+  assert_equal 0, @product.line_items.count
+end
+
+test "should destroy product" do
     assert_difference('Product.count', -1) do
-      delete :destroy, id: @product
+
+    # "simulate" a product that has never been added to cart
+    # alternatively you could update your fixtures to do this
+
+    @product.line_items.each do |item|
+      item.destroy
     end
 
-    assert_redirected_to products_path
+    delete :destroy, id: @product
   end
+
+  assert_redirected_to products_path
+end
 end

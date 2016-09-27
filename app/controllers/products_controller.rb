@@ -54,12 +54,30 @@ class ProductsController < ApplicationController
   # DELETE /products/1
   # DELETE /products/1.json
   def destroy
-    @product.destroy
-    respond_to do |format|
-      format.html { redirect_to products_url, notice: 'Product was successfully destroyed.' }
-      format.json { head :no_content }
-    end
+  @product = Product.find(params[:id])
+  if @product.destroy
+    flash[:notice] = "#{@product.title} successfully deleted"
+  else
+    flash[:notice] = "It appears there are other carts that currently have #{@product.title} so we won't delete it at this time"
   end
+
+  respond_to do |format|
+    format.html { redirect_to products_url }
+    format.json { head :no_content }
+  end
+end
+
+
+  def who_bought
+    @product = Product.find(params[:id])
+    @latest_order = @product.orders.order(:updated_at).last
+    if stale?(@latest_order)
+        respond_to do |format|
+          format.atom
+        end
+      end
+  end
+
 
   private
     # Use callbacks to share common setup or constraints between actions.
